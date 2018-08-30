@@ -8,6 +8,10 @@ import { Hero } from './hero';
 import { HEROES } from './mock-heroes';
 import { MessageService } from './message.service';
 
+const httpOptions = {
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+};
+
 @Injectable({ providedIn: 'root' })
 export class HeroService {
   private heroesUrl = 'api/heroes';  // Web APIのURL
@@ -40,11 +44,18 @@ export class HeroService {
     );
   }
 
+  //////// Save methods //////////
+
+  /** POST: サーバーに新しいヒーローを登録する */
+  addHero (hero: Hero): Observable<Hero> {
+    return this.http.post<Hero>(this.heroesUrl, hero, httpOptions).pipe(
+      tap((hero: Hero) => this.log(`added hero w/ id=${hero.id}`)),
+      catchError(this.handleError<Hero>('addHero'))
+    );
+  }
+
   /** PUT: サーバー上でヒーローを更新 */
   updateHero (hero: Hero): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    };
     return this.http.put(this.heroesUrl, hero, httpOptions).pipe(
       tap(_ => this.log(`updated hero id=${hero.id}`)),
       catchError(this.handleError<any>('updateHero'))
